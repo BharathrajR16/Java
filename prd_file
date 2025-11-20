@@ -1,0 +1,199 @@
+Product Requirements Document (PRD): Subscription Organizer & Bill Alert
+
+Document Version: 1.0 (MVP)
+
+Target Platform: Android (API 24+)
+
+Technology Stack: Kotlin, Jetpack Compose, Firebase (Firestore & FCM)
+
+Project Goal: To provide a simple, reliable, and user-friendly mobile application that alerts users about upcoming subscription renewals, allowing them to make timely cancellation decisions and save money.
+
+1. Goals and Success Metrics
+
+1.1 Core Problem Solved
+
+Users frequently lose track of their recurring bills and auto-renew subscriptions they intended to cancel, leading to unnecessary financial waste.
+
+1.2 Business Goals
+
+Retention: Achieve a 7-day retention rate of 30% after the first notification is triggered.
+
+Adoption: Acquire 100 organic users within the first month of launch.
+
+Monetization Validation (Future): Convert 5% of users who hit the 5-subscription limit to the premium tier upon introducing payment.
+
+1.3 MVP Success Criteria
+
+The application can reliably save, retrieve, and display user-inputted subscription data.
+
+Authentication (sign-in/sign-up) must be seamless and secure using Firebase.
+
+The system must successfully trigger a persistent, actionable notification exactly 7 days before a scheduled renewal date.
+
+The 5-subscription free limit must be correctly enforced.
+
+2. Scope (Minimum Viable Product - MVP)
+
+The MVP will focus on the core value proposition: Tracking + Reliable Notification.
+
+Feature Category
+
+Feature
+
+Status
+
+Notes
+
+Authentication
+
+User Sign-up/Login/Logout
+
+MUST HAVE
+
+Firebase Authentication (Email/Password & Anonymous sign-in for quick start).
+
+Data Management
+
+Add New Subscription Form (Name, Cost, Date)
+
+MUST HAVE
+
+Simple UI for manual text, decimal, and date input.
+
+Data Management
+
+Subscription List Dashboard
+
+MUST HAVE
+
+Displays all subscriptions, sorted by next renewal date.
+
+Data Management
+
+Delete/Edit Subscription
+
+MUST HAVE
+
+Ability to remove or modify an existing entry.
+
+Core Value
+
+Renewal Alert Logic
+
+MUST HAVE
+
+Calculate 7 days before renewalDate.
+
+Core Value
+
+Actionable Push Notification
+
+MUST HAVE
+
+Notification shows "Cancel or Keep?" and links directly to the app's list.
+
+Freemium Gate
+
+Subscription Limit
+
+MUST HAVE
+
+Hard limit of 5 active subscriptions for non-Pro users.
+
+Metrics
+
+Total Monthly/Annual Cost
+
+SHOULD HAVE
+
+A simple sum calculation displayed on the Dashboard.
+
+3. User Stories (MVP)
+
+Authentication
+
+As a first-time user, I want to sign up easily so I can start tracking my bills. (Firebase Auth)
+
+As a returning user, I want to log in quickly so I can access my subscription list.
+
+Subscription Management
+
+As a user, I want to add a new subscription by providing its name, monthly cost, and next renewal date so the app can track it.
+
+As a user, I want to see a list of all my active subscriptions, sorted by the soonest renewal date, so I know what is coming up.
+
+As a user, I want to see the total sum of my monthly and yearly subscription costs on the dashboard so I can visualize my spending.
+
+Core Alert Feature
+
+As a user, when I save a subscription, I want the app to schedule a notification for 7 days before the renewal date.
+
+As a user, I want to receive a push notification that says "Cancel or Keep? [Subscription Name] renews in 7 days for $[Cost]" so I have time to act.
+
+As a user, when I tap the notification, I want to be taken directly to the subscription list in the app.
+
+Monetization Enforcement
+
+As a free user, when I try to add my 6th subscription, I want to see a dialog explaining the 5-subscription limit and an option to upgrade.
+
+4. Technical and Implementation Details
+
+4.1 Frontend (Android Native)
+
+Language: Kotlin
+
+UI Framework: Jetpack Compose (Focus on Material 3 Design for a clean, fast UI).
+
+Architecture: Simple MVVM (Model-View-ViewModel) pattern to separate UI logic from business logic.
+
+UI Components: Use Scaffold, LazyColumn, and Card components for the main list. Use a DatePickerDialog for inputting the renewal date.
+
+4.2 Backend and Data Persistence
+
+Service: Google Firebase (Spark Plan - Free Tier).
+
+Database: Cloud Firestore for storing subscription data.
+
+Structure: /subscriptions/{subscriptionId}
+
+Fields per Document: name: String, cost: Double, renewalDate: Timestamp, userId: String, isPro: Boolean (default: false).
+
+4.3 Notifications (The Highest Priority)
+
+Mechanism: Android Local Notifications and AlarmManager.
+
+Rationale: Since the alerts are tied to manually entered dates and do not require real-time server interaction (like stock market changes), local scheduling is more reliable, simpler, and completely free.
+
+Implementation Flow:
+
+User saves a subscription with renewalDate.
+
+The ViewModel/Repository calculates alertTime = renewalDate - 7 days.
+
+A unique ID is generated for the subscription.
+
+The Android AlarmManager is used to set a precise, one-time alarm for the alertTime.
+
+The alarm triggers a BroadcastReceiver, which then creates and displays the notification using NotificationManagerCompat.
+
+4.4 Freemium Gate Logic
+
+The SubscriptionRepository must include a function to count active subscriptions for the current userId.
+
+The main "Add Subscription" action handler will call this counter. If count >= 5 and the user is not marked as isPro, the application will display the upgrade dialog instead of the input form.
+
+5. Future Scope (Phase 2)
+
+Features to be considered after the MVP is stable and validated.
+
+In-App Purchase Integration: Implement Stripe or Google Play Billing for the Premium Tier purchase (unlimited subscriptions, category linking).
+
+Categorization: Allow users to tag subscriptions (e.g., Streaming, Utilities, SaaS) and filter the list by category.
+
+Statistics: Implement a chart/graph view of spending trends (e.g., total cost over the last 6 months).
+
+Cloud Function Backend (for advanced notifications): If the local notification model proves unreliable for some users, migrate the scheduling logic to a Firebase Cloud Function that sends notifications via Firebase Cloud Messaging (FCM). This is slightly more complex but ensures server-side reliability.
+
+Currency Support: Allow users to select their local currency and display costs accordingly.
+
+Theming: Add a dark mode option.
