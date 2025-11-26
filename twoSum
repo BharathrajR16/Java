@@ -1,0 +1,20 @@
+fun main(args: Array<String>) {
+    println("Hello, World!")
+    
+    val arr=intArrayOf(2,7,4,5,7)
+    val target=9
+    val res=twoNumber(arr,target)
+    println(res.joinToString())
+}
+
+fun twoNumber(arr:IntArray,target:Int):IntArray{
+  val map=HashMap<Int,Int>()
+  for(num in arr.indices){
+    var res=target-arr[num]
+    if(map.containsKey(res)){
+      return intArrayOf(map[res]!!,res)
+    }
+    map[arr[num]]=num
+  }
+  return intArrayOf()
+}
